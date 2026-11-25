@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>An toàn khí ga, bếp điện</title>
+<link rel="preload" href="montserrat-vi.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* VOICE: khẩn thiết nhưng ấm áp, nói thẳng như cán bộ phường hướng dẫn bà con
+   IDEA: một buổi diễn tập PCCC ngay trong căn bếp nhà mình
+   PICTURE: căn bếp SVG có bình ga, đám khí ga dâng từ sàn, công tắc, cửa sổ; vụ nổ khi bấm sai
+   COLOUR & TYPE: đỏ cứu hỏa + vàng cảnh báo trên nền trắng ấm; Montserrat, chữ to cho người cao tuổi
+   LAYOUT: một cột, mô phỏng đặt ngay đầu trang; nút bấm to, xếp chồng trên điện thoại */
+@font-face{font-family:"Montserrat";src:url("montserrat-vi.woff2") format("woff2");font-weight:500 900;font-display:swap}
+@font-face{font-family:"MontFB";src:local("Arial"),local("Roboto"),local("Helvetica");size-adjust:112%}
+:root{--z-local:2;--z-float:50;--z-modal:1000;color-scheme:light dark;--bg:light-dark(#fffaf2,#16110e);--card:light-dark(#ffffff,#241b16);--ink:light-dark(#1b1a22,#f6efe8);--mute:light-dark(#4a4550,#cfc5bc);--red:light-dark(#b71c1c,#ff6b5e);--redbg:#b71c1c;--yel:#ffc93c;--yelbg:light-dark(#fff3cc,#3a2e10);--grn:light-dark(#1b7a3a,#5fd98a);--line:light-dark(#eadfd2,#3a2e26)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:20px}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 20px/1.55 Montserrat,MontFB,"Segoe UI",Roboto,Arial,sans-serif;overflow-x:clip;-webkit-text-size-adjust:100%}
+.band{padding:clamp(24px,4vw,56px) max(5vw,16px)}
+.in{max-width:1080px;margin:0 auto}
+h1{font-size:clamp(34px,7vw,56px);line-height:1.08;font-weight:900;margin:.2em 0 .3em;text-wrap:balance}
+h2{font-size:clamp(30px,5vw,44px);line-height:1.12;font-weight:900;margin:0 0 .4em;text-wrap:balance}
+h3{font-size:24px;line-height:1.25;margin:0 0 .3em;font-weight:800}
+p{margin:0 0 .8em;max-width:62ch}
+.top{background:var(--redbg);color:#fff}
+.top .in{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between}
+.org{font-weight:800;font-size:18px}
+.call{display:inline-flex;align-items:center;gap:10px;background:var(--yel);color:#1b1a22;font-weight:900;font-size:22px;padding:10px 20px;border-radius:40px;text-decoration:none;min-height:52px}
+.top .nav{display:flex;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;gap:10px;margin-top:12px;padding-bottom:4px}
+.nav a{flex:none;white-space:nowrap;color:#fff;font-weight:700;font-size:18px;padding:8px 14px;border:2px solid rgba(255,255,255,.5);border-radius:30px;text-decoration:none}
+.lead{font-size:22px;color:var(--mute)}
+.card{background:var(--card);border-radius:24px;padding:clamp(16px,3vw,28px);box-shadow:0 6px 0 var(--line);border:2px solid var(--line)}
+.sim{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:22px;align-items:start}
+@media(max-width:820px){.sim{grid-template-columns:minmax(0,1fr)}}
+.scene{position:relative;border-radius:20px;overflow:hidden;background:#fdf0dc;aspect-ratio:4/3}
+.scene svg{position:absolute;inset:0;width:100%;height:100%}
+.shake{animation:shake .7s}
+@keyframes shake{20%{transform:translate(-12px,6px)}40%{transform:translate(10px,-8px)}60%{transform:translate(-8px,4px)}80%{transform:translate(6px,-3px)}}
+.meter{margin:14px 0 6px}
+.mlab{display:flex;justify-content:space-between;gap:10px;font-weight:800;font-size:20px;flex-wrap:wrap}
+.bar{position:relative;height:34px;border-radius:17px;background:light-dark(#e9f6ec,#1f3326);overflow:hidden;border:2px solid var(--line)}
+.zone{position:absolute;top:0;bottom:0;left:13.33%;width:53.33%;background:repeating-linear-gradient(45deg,#ffd6d0 0 12px,#ffc2ba 12px 24px)}
+.fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#ffb347,#e53935);opacity:.9;transition:width .2s}
+.ticks{position:relative;height:26px;font-size:16px;color:var(--mute);font-weight:700}
+.status{font-weight:800;font-size:22px;padding:12px 16px;border-radius:14px;margin:10px 0;background:var(--yelbg)}
+.status.danger{background:var(--redbg);color:#fff}
+.status.ok{background:light-dark(#dff5e6,#163a24);color:var(--grn)}
+.acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(max-width:420px){.acts{grid-template-columns:minmax(0,1fr)}}
+button{font:inherit;font-weight:800;font-size:19px;line-height:1.25;min-height:60px;padding:10px 14px;border-radius:16px;border:3px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px}
+button:focus-visible,a:focus-visible{outline:4px solid #1e6fe8;outline-offset:3px}
+button:disabled{opacity:.45;cursor:default}
+button .ic{flex:0 0 34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:18px;font-weight:900;color:#fff}
+button .ic{background:#78909c}button.done .ic{background:#1b7a3a}button.oops{border-color:#b71c1c;background:light-dark(#ffe9e6,#3a1916)}button.oops .ic{background:#b71c1c}
+button.done{border-color:#1b7a3a;background:light-dark(#e6f7ec,#173523)}
+.btn-main{background:var(--redbg);color:#fff;border-color:var(--redbg);justify-content:center;text-align:center}
+.hint{font-size:18px;color:var(--mute);margin-top:10px}
+.steps{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:6px;font-size:19px}
+.steps li{display:flex;gap:10px;align-items:flex-start}
+.steps li::before{content:"";flex:0 0 26px;height:26px;border-radius:50%;border:3px solid var(--line);margin-top:2px}
+.steps li.ok::before{background:#1b7a3a;border-color:#1b7a3a}
+.steps li.no::before{background:#b71c1c;border-color:#b71c1c}
+#boom{position:fixed;inset:0;z-index:var(--z-modal);display:none;align-items:center;justify-content:center;padding:16px;background:radial-gradient(circle,#fff6b0 0,#ff9d2e 30%,#c62828 60%,#2a0a05 100%)}
+#boom.on{display:flex;animation:flash .9s ease-out}
+@keyframes flash{0%{filter:brightness(3)}100%{filter:brightness(1)}}
+.res{background:var(--card);color:var(--ink);border-radius:24px;padding:clamp(18px,4vw,32px);max-width:640px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.res h2{color:var(--red)}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+@media(max-width:820px){.two{grid-template-columns:minmax(0,1fr)}}
+.pan{aspect-ratio:4/3;border-radius:20px;overflow:hidden;position:relative;background:#e8eef5}
+.pan svg{position:absolute;inset:0;width:100%;height:100%}
+#flame{transform-origin:200px 170px;transition:transform .5s}
+.dev{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(max-width:420px){.dev{grid-template-columns:minmax(0,1fr)}}
+.dev button[aria-pressed=true]{border-color:#e53935;background:light-dark(#ffe9e6,#3a1916)}
+.w{font-variant-numeric:tabular-nums;white-space:nowrap}
+.q{margin-bottom:22px}
+.q .opts{display:grid;gap:10px;margin-top:10px}
+.q button.right{border-color:#1b7a3a;background:light-dark(#e6f7ec,#173523)}
+.q button.wrong{border-color:#b71c1c;background:light-dark(#ffe9e6,#3a1916)}
+.fb{font-size:19px;font-weight:700;margin-top:8px}
+.chk{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.chk label{display:flex;gap:14px;align-items:flex-start;padding:14px;border-radius:16px;border:3px solid var(--line);background:var(--card);cursor:pointer;font-weight:700}
+.chk input{width:30px;height:30px;flex:0 0 30px;accent-color:#1b7a3a;margin:0}
+.foot{background:var(--redbg);color:#fff;text-align:center}
+.foot .big{font-size:clamp(64px,16vw,120px);font-weight:900;line-height:1;color:var(--yel)}
+.note{font-size:16px;color:var(--mute)}
+body.modal{overflow:hidden}
+.cv{content-visibility:auto;contain-intrinsic-size:auto 900px}
+.gate{position:absolute;inset:0;z-index:var(--z-local);display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(20,16,14,.6)}
+.gate[hidden]{display:none}
+.gin{display:grid;gap:14px;justify-items:center;text-align:center;color:#fff;font-weight:800;font-size:21px;line-height:1.35}
+.gin button{min-width:min(280px,100%);font-size:21px;border-color:#fff}
+.totop{position:fixed;right:16px;bottom:20px;z-index:var(--z-float);width:60px;height:60px;min-height:0;padding:0;border-radius:50%;justify-content:center;background:var(--redbg);border:3px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.3);opacity:0;visibility:hidden;transform:translateY(12px);transition:opacity .2s,transform .2s,visibility .2s}
+.totop.show{opacity:1;visibility:visible;transform:none}
+.totop svg{width:30px;height:30px}
+body.modal .totop{display:none}
+@media(prefers-reduced-motion:reduce){.shake,#boom.on{animation:none}.fill,#flame{transition:none}}
+</style>
+</head>
+<body>
+<header class="top band" style="padding-block:14px">
+  <div class="in">
+    <div class="org">UBND phường Ô Chợ Dừa · Tuyên truyền PCCC</div>
+    <a class="call" href="tel:114" aria-label="Gọi 114">☎ Gọi 114</a>
+  </div>
+  <nav class="in nav" aria-label="Mục lục">
+    <a href="#ga">Rò rỉ khí ga</a><a href="#dau">Chảo dầu cháy</a><a href="#o-cam">Ổ cắm quá tải</a><a href="#do-vui">Đố vui</a><a href="#kiem-tra">Kiểm tra nhà mình</a>
+  </nav>
+</header>
+
+<main>
+<section class="band" id="ga">
+  <div class="in">
+    <h1>Nhà bạn đang rò rỉ khí ga. Bạn sẽ làm gì?</h1>
+    <p class="lead">Hãy bấm thử các nút bên dưới để thấy điều gì xảy ra. Chọn sai trong mô phỏng thì không ai bị thương. Ngoài đời thật thì không có cơ hội làm lại.</p>
+    <div class="sim">
+      <div>
+        <div class="scene" id="scene">
+          <svg viewBox="0 0 400 300" role="img" aria-label="Căn bếp có bình ga đang rò rỉ">
+            <defs><linearGradient id="gas" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#9ccc65" stop-opacity=".85"/><stop offset="1" stop-color="#c5e1a5" stop-opacity=".15"/></linearGradient></defs>
+            <rect width="400" height="300" fill="#fdf0dc"/>
+            <rect y="230" width="400" height="70" fill="#d7b98e"/>
+            <g id="win"><rect x="236" y="40" width="120" height="90" rx="6" fill="#9fd3f0" stroke="#6d4c41" stroke-width="6"/>
+              <rect id="wl" x="239" y="43" width="57" height="84" fill="#cde9f8" stroke="#6d4c41" stroke-width="3"/>
+              <rect id="wr" x="296" y="43" width="57" height="84" fill="#cde9f8" stroke="#6d4c41" stroke-width="3"/></g>
+            <rect x="20" y="150" width="190" height="80" fill="#8d6e63"/><rect x="20" y="140" width="190" height="14" fill="#5d4037"/>
+            <rect x="60" y="126" width="80" height="16" rx="4" fill="#37474f"/><circle cx="82" cy="126" r="8" fill="#263238"/><circle cx="118" cy="126" r="8" fill="#263238"/>
+            <g><rect x="150" y="176" width="44" height="54" rx="14" fill="#e53935"/><rect x="163" y="166" width="18" height="12" fill="#b71c1c"/>
+              <rect id="valve" x="160" y="160" width="24" height="7" rx="3" fill="#ffb300"/></g>
+            <path d="M140 134 C150 150,160 150,172 166" stroke="#455a64" stroke-width="4" fill="none"/>
+            <rect x="372" y="120" width="18" height="28" rx="3" fill="#fff" stroke="#90a4ae" stroke-width="2"/><rect id="sw" x="377" y="126" width="8" height="10" rx="2" fill="#90a4ae"/>
+            <rect x="266" y="150" width="70" height="80" rx="6" fill="#eceff1" stroke="#b0bec5" stroke-width="3"/><text x="301" y="198" text-anchor="middle" font-size="12" font-family="Montserrat,Arial" font-weight="700" fill="#78909c">Tủ lạnh</text>
+            <rect id="cloud" x="0" y="300" width="400" height="0" fill="url(#gas)"/>
+            <g id="fire" opacity="0"><circle cx="200" cy="170" r="160" fill="#ff7043"/><circle cx="200" cy="170" r="110" fill="#ffb300"/><circle cx="200" cy="170" r="60" fill="#fff59d"/></g>
+          </svg>
+          <div class="gate" id="gate"><div class="gin"><div id="gateMsg">Mô phỏng chưa chạy</div><button class="btn-main" id="gateBtn">▶ Bắt đầu trải nghiệm</button></div></div>
+        </div>
+        <div class="meter">
+          <div class="mlab"><span>Nồng độ khí ga</span><span class="w" id="pct">0,0%</span></div>
+          <div class="bar" aria-hidden="true"><div class="zone"></div><div class="fill" id="fill"></div></div>
+          <div class="ticks"><span style="position:absolute;left:0">0%</span><span style="position:absolute;left:13.33%;transform:translateX(-50%)">2%</span><span style="position:absolute;left:66.67%;transform:translateX(-50%)">10%</span><span style="position:absolute;right:0">15%</span></div>
+          <p class="hint">Vùng gạch đỏ (khoảng 2–10% khí ga trong không khí) là vùng có thể nổ chỉ với một tia lửa nhỏ. Khí ga nặng hơn không khí nên đọng sát sàn nhà trước.</p>
+        </div>
+      </div>
+      <div>
+        <div class="status" id="st" role="status" aria-live="polite">Bình ga đang rò rỉ. Mùi ga bắt đầu lan ra.</div>
+        <div class="w" style="font-size:18px;color:var(--mute);font-weight:700">Thời gian mô phỏng: <span id="clock">0</span> phút</div>
+        <h3 style="margin-top:14px">Bạn chọn làm gì?</h3>
+        <div class="acts" id="acts">
+          <button data-a="light"><span class="ic">?</span>Bật đèn cho sáng</button>
+          <button data-a="cloth"><span class="ic">?</span>Bịt mũi bằng khăn ướt</button>
+          <button data-a="fan"><span class="ic">?</span>Bật quạt hút cho bay mùi</button>
+          <button data-a="valve"><span class="ic">?</span>Khóa van bình ga</button>
+          <button data-a="phone"><span class="ic">?</span>Gọi điện ngay trong bếp</button>
+          <button data-a="window"><span class="ic">?</span>Mở cửa sổ, cửa chính</button>
+          <button data-a="lighter"><span class="ic">?</span>Bật lửa tìm chỗ hở</button>
+          <button data-a="out"><span class="ic">?</span>Ra ngoài rồi gọi 114</button>
+        </div>
+        <ul class="steps" id="chk">
+          <li data-k="cloth">Che mũi miệng bằng khăn ướt</li>
+          <li data-k="valve">Khóa van bình ga</li>
+          <li data-k="window">Mở cửa cho khí ga thoát ra</li>
+          <li data-k="spark">Không tạo tia lửa</li>
+          <li data-k="out">Ra nơi an toàn, gọi 114</li>
+        </ul>
+        <button class="btn-main" id="reset" style="margin-top:14px;width:100%">Làm lại từ đầu</button>
+      </div>
+    </div>
+    <p class="note" style="margin-top:14px">Đây là mô phỏng minh họa. 1 giây trên màn hình tương ứng 1 phút ngoài đời. Tốc độ rò rỉ thực tế tùy vào mức hở của van và ống dẫn.</p>
+  </div>
+</section>
+
+<section class="band cv" id="dau" style="background:var(--yelbg)">
+  <div class="in">
+    <h2>Chảo dầu bốc cháy trên bếp điện</h2>
+    <p>Đang rán đồ thì chảo dầu quá nóng, tự bùng cháy. Bạn xử lý thế nào?</p>
+    <div class="two">
+      <div class="pan" id="panbox">
+        <svg viewBox="0 0 400 300" role="img" aria-label="Chảo dầu đang cháy trên bếp từ">
+          <rect width="400" height="300" fill="#e8eef5"/><rect y="220" width="400" height="80" fill="#b0bec5"/>
+          <rect x="70" y="210" width="260" height="22" rx="6" fill="#263238"/><circle cx="200" cy="221" r="6" id="led" fill="#ff5252"/>
+          <path d="M110 190 h180 a10 10 0 0 1 -10 20 h-160 a10 10 0 0 1 -10 -20z" fill="#37474f"/><rect x="290" y="192" width="80" height="10" rx="5" fill="#212121"/>
+          <rect x="120" y="182" width="160" height="10" rx="4" fill="#f9a825"/>
+          <g id="lid" opacity="0"><path d="M106 182 Q200 120 294 182 Z" fill="#90a4ae" stroke="#607d8b" stroke-width="4"/><circle cx="200" cy="140" r="9" fill="#455a64"/></g>
+          <g id="flame"><path d="M200 60 C230 100,260 120,250 170 L150 170 C140 120,170 100,200 60Z" fill="#ff7043"/><path d="M200 100 C220 125,232 140,226 170 L174 170 C168 140,182 125,200 100Z" fill="#ffd54f"/></g>
+        </svg>
+      </div>
+      <div>
+        <div class="status" id="st2" role="status" aria-live="polite">Lửa đang cháy trong chảo dầu!</div>
+        <div class="acts" style="grid-template-columns:minmax(0,1fr)">
+          <button data-o="water"><span class="ic">?</span>Dội nước vào chảo</button>
+          <button data-o="carry"><span class="ic">?</span>Bưng chảo chạy ra ngoài</button>
+          <button data-o="lid"><span class="ic">?</span>Tắt bếp, đậy kín vung</button>
+          <button data-o="blanket"><span class="ic">?</span>Trùm chăn chữa cháy hoặc khăn ướt vắt kiệt</button>
+        </div>
+        <button class="btn-main" id="reset2" style="margin-top:12px;width:100%">Thử lại</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band cv" id="o-cam">
+  <div class="in">
+    <h2>Một ổ cắm chịu được bao nhiêu thiết bị?</h2>
+    <p>Ổ cắm kéo dài thông dụng chịu tối đa khoảng 10A, tức khoảng <b class="w">2.200 W</b>. Bấm để cắm thêm thiết bị vào cùng một ổ:</p>
+    <div class="card">
+      <div class="dev" id="dev"></div>
+      <div class="meter">
+        <div class="mlab"><span>Tổng công suất</span><span class="w" id="wt">0 W / 2.200 W</span></div>
+        <div class="bar"><div class="fill" id="wfill" style="background:linear-gradient(90deg,#43a047,#ffb300,#e53935)"></div></div>
+      </div>
+      <div class="status ok" id="st3" role="status" aria-live="polite">Ổ cắm đang an toàn.</div>
+    </div>
+  </div>
+</section>
+
+<section class="band cv" id="do-vui" style="background:var(--yelbg)">
+  <div class="in">
+    <h2>Đố vui 5 câu</h2>
+    <div id="quiz"></div>
+    <div class="status" id="score" style="display:none"></div>
+  </div>
+</section>
+
+<section class="band cv" id="kiem-tra">
+  <div class="in">
+    <h2>Nhà tôi đã an toàn chưa?</h2>
+    <p>Đánh dấu những việc nhà bạn đã làm. Kết quả chỉ lưu trên máy của bạn.</p>
+    <ul class="chk" id="chklist"></ul>
+    <div class="status" id="chkres" style="margin-top:14px"></div>
+  </div>
+</section>
+</main>
+
+<footer class="foot band">
+  <div class="in">
+    <div style="font-size:24px;font-weight:800">Khi có cháy nổ, rò rỉ khí ga, ra nơi an toàn và gọi</div>
+    <a href="tel:114" class="big" style="text-decoration:none;display:block">114</a>
+    <div style="font-size:20px;font-weight:700">Cảnh sát PCCC và CNCH</div>
+    <p style="margin:18px auto 0;font-size:17px;opacity:.9">UBND phường Ô Chợ Dừa, Hà Nội</p>
+  </div>
+</footer>
+
+<button class="totop" id="totop" aria-label="Lên đầu trang" title="Lên đầu trang"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l-7 7m7-7l7 7M12 5v15" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+<div id="boom" role="alertdialog" aria-modal="true" aria-labelledby="bt">
+  <div class="res"><h2 id="bt">ĐÃ PHÁT NỔ!</h2><p id="bmsg"></p>
+    <p>Một vụ nổ khí ga trong nhà có thể làm vỡ cửa kính, đổ tường, gây cháy lan và bỏng nặng cho người đứng gần. Nhiều vụ đã gây chết người.</p>
+    <p><b>Nhớ:</b> khi ngửi thấy mùi ga, tuyệt đối không bật/tắt bất cứ thiết bị điện nào, không đánh lửa, không dùng điện thoại trong nhà.</p>
+    <button class="btn-main" id="again" style="width:100%">Thử lại</button></div>
+</div>
+
+<script>
+{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt=n=>n.toFixed(1).replace('.',',');
+/* ---------- Mô phỏng khí ga ---------- */
+/* Chỉ chạy khi người dùng bấm "Bắt đầu"; tự tạm dừng khi không thao tác, rời khỏi vùng mô phỏng hoặc chuyển tab */
+const IDLE=45000;let S,timer=null,idleT=null;
+const acts=()=>$$('#acts button');
+function say(t,c){const s=$('#st');s.textContent=t;s.className='status '+(c||'')}
+function mark(k,ok){const l=$(`#chk li[data-k=${k}]`);if(l)l.className=ok?'ok':'no'}
+function gate(mode){const g=$('#gate');if(!mode){g.hidden=true;return}g.hidden=false;
+  $('#gateMsg').textContent=mode==='start'?'Mô phỏng chưa chạy':mode;
+  $('#gateBtn').textContent=mode==='start'?'▶ Bắt đầu trải nghiệm':'▶ Tiếp tục'}
+function stop(){clearInterval(timer);timer=null;clearTimeout(idleT);idleT=null;if(S)S.run=false}
+function init(){stop();S={gas:0,t:0,valve:true,win:false,cloth:false,out:false,over:false,spark:true,inZone:0,run:false};
+  acts().forEach(b=>{b.disabled=true;b.classList.remove('done','oops')});
+  $$('#chk li').forEach(l=>l.className='');
+  $('#wl').setAttribute('width',57);$('#wr').setAttribute('x',296);$('#wr').setAttribute('width',57);
+  $('#valve').setAttribute('fill','#ffb300');$('#sw').setAttribute('fill','#90a4ae');$('#fire').setAttribute('opacity',0);
+  say('Bấm "Bắt đầu trải nghiệm" để mô phỏng một vụ rò rỉ khí ga.','');gate('start');draw()}
+function run(){if(S.over)return;S.run=true;gate(null);
+  acts().forEach(b=>{if(!b.classList.contains('done'))b.disabled=false});
+  if(S.t===0)say('Bình ga đang rò rỉ. Mùi ga bắt đầu lan ra.','');else say('Tiếp tục mô phỏng. Khí ga vẫn đang rò rỉ.','');
+  if(!timer)timer=setInterval(tick,200);poke()}
+function pause(why){if(!S.run||S.over)return;stop();acts().forEach(b=>b.disabled=true);gate(typeof why==='string'?why:'Đã tạm dừng vì một lúc không thao tác');say('Mô phỏng đang tạm dừng.','')}
+function poke(){if(!S||!S.run)return;clearTimeout(idleT);idleT=setTimeout(pause,IDLE)}
+function tick(){if(S.over||!S.run)return;S.t+=.2;
+  if(S.valve)S.gas+=.09;
+  if(S.win)S.gas-=S.gas*.045+.03;
+  S.gas=Math.max(0,Math.min(15,S.gas));
+  if(S.gas>=2&&!S.out){S.inZone+=.2;if(S.inZone>=14){boom('Bạn chờ quá lâu. Tủ lạnh tự đóng điện để làm lạnh, rơ-le bên trong tạo ra một tia lửa nhỏ. Thế là đủ để khí ga phát nổ.');return}}
+  if(!S.out){if(S.gas>=2)say(S.gas>10?'Khí ga rất đặc, ngạt thở! Rìa đám khí vẫn có thể nổ.':'NGUY HIỂM: khí ga đã đủ để phát nổ!','danger');
+    else if(S.gas<.2&&!S.valve)say('Khí ga đã loãng. Ra ngoài và gọi 114 hoặc đơn vị cung cấp ga để kiểm tra.','ok');}
+  draw()}
+function draw(){const g=S.gas;$('#pct').textContent=fmt(g)+'%';$('#fill').style.width=(g/15*100)+'%';
+  $('#clock').textContent=Math.floor(S.t);
+  const h=Math.min(230,g/15*230+(g>0?20:0));const c=$('#cloud');c.setAttribute('y',300-h);c.setAttribute('height',h);c.setAttribute('opacity',Math.min(1,.25+g/8))}
+let lastFocus=null;
+function boom(msg){S.over=true;stop();$('#fire').setAttribute('opacity',1);mark('spark',false);
+  $('#bmsg').textContent=msg;lastFocus=document.activeElement;document.body.classList.add('modal');$('#boom').classList.add('on');
+  if(!RM){const m=$('main');m.classList.remove('shake');void m.offsetWidth;m.classList.add('shake')}
+  try{navigator.vibrate&&navigator.vibrate([300,100,300])}catch(e){}
+  $('#again').focus()}
+const SPARK={light:'Công tắc đèn khi bật tạo ra tia lửa điện rất nhỏ bên trong. Tia lửa đó đã kích nổ khí ga.',
+  fan:'Động cơ và công tắc quạt tạo tia lửa điện. Quạt còn khuấy khí ga lan khắp phòng.',
+  phone:'Điện thoại và pin có thể phát tia lửa, nhất là khi đổ chuông, cắm sạc hoặc rơi. Không dùng điện thoại nơi có khí ga.',
+  lighter:'Ngọn lửa bật lửa kích nổ ngay lập tức. Không bao giờ dùng lửa để tìm chỗ rò rỉ.'};
+function act(a,btn){if(S.over||!S.run)return;poke();
+  if(SPARK[a]){btn.classList.add('oops');if(a==='light')$('#sw').setAttribute('fill','#ffeb3b');
+    if(S.gas>=2&&!S.out)return boom(SPARK[a]);
+    S.spark=false;mark('spark',false);
+    say('May mắn: khí ga chưa đủ nồng độ nên chưa nổ. Đây là việc tuyệt đối không được làm!','danger');return}
+  btn.classList.add('done');btn.disabled=true;
+  if(a==='cloth'){S.cloth=true;mark('cloth',true);say('Tốt! Khăn ướt giúp hạn chế hít phải khí ga.','ok')}
+  if(a==='valve'){S.valve=false;mark('valve',true);$('#valve').setAttribute('fill','#43a047');
+    say(S.cloth?'Đã khóa van. Khí ga ngừng rò ra.':'Đã khóa van. Lần sau nhớ bịt khăn ướt trước khi đến gần bình.','ok');if(!S.cloth)mark('cloth',false)}
+  if(a==='window'){S.win=true;mark('window',true);$('#wl').setAttribute('width',14);$('#wr').setAttribute('x',339);$('#wr').setAttribute('width',14);say('Đã mở cửa. Gió tự nhiên đang đẩy khí ga ra ngoài.','ok')}
+  if(a==='out'){S.out=true;S.over=true;stop();mark('out',true);if(S.spark)mark('spark',true);
+    const n=$$('#chk li.ok').length;
+    say(n===5?'Xuất sắc! Bạn đã làm đúng cả 5 bước. Chờ lực lượng chức năng đến kiểm tra.':`Bạn đã an toàn, làm đúng ${n}/5 bước. Bấm "Làm lại từ đầu" để thử đủ các bước.`,'ok');
+    acts().forEach(b=>b.disabled=true)}}
+$('#acts').addEventListener('click',e=>{const b=e.target.closest('button');if(b)act(b.dataset.a,b)});
+$('#gateBtn').addEventListener('click',run);
+$('#reset').addEventListener('click',init);
+function closeBoom(){$('#boom').classList.remove('on');document.body.classList.remove('modal')}
+$('#again').addEventListener('click',()=>{closeBoom();init();run();$('#ga').scrollIntoView();$('#st').focus?.()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#boom').classList.contains('on'))$('#again').click()});
+['pointerdown','keydown','wheel','touchstart'].forEach(ev=>document.addEventListener(ev,poke,{passive:true}));
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pause('Đã tạm dừng khi bạn chuyển sang ứng dụng khác')});
+if('IntersectionObserver' in window){const simObs=new IntersectionObserver(es=>{if(!es[0].isIntersecting)pause('Đã tạm dừng khi bạn rời khỏi phần mô phỏng')},{threshold:0});simObs.observe($('#ga .sim'))}
+init();
+/* ---------- Nút lên đầu trang ---------- */
+const top=$('#totop');
+let past=false,lastY=scrollY,ticking=false;
+function upd(){ticking=false;const y=scrollY,d=y-lastY,atEnd=innerHeight+y>=document.documentElement.scrollHeight-80;
+  if(Math.abs(d)<6&&!atEnd)return;lastY=y;top.classList.toggle('show',past&&(atEnd||d<0))}
+if('IntersectionObserver' in window){const topObs=new IntersectionObserver(es=>{past=!es[0].isIntersecting;if(!past)top.classList.remove('show')},{rootMargin:'400px 0px 0px 0px'});topObs.observe($('header.top'))}else past=true;
+addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(upd)}},{passive:true});
+top.addEventListener('click',()=>{window.scrollTo({top:0,behavior:RM?'auto':'smooth'});$('.org').setAttribute('tabindex','-1');$('.org').focus({preventScroll:true})});
+/* ---------- Chảo dầu ---------- */
+const OIL={water:['bad',2.6,'SAI! Nước gặp dầu sôi hóa hơi ngay, hất dầu đang cháy tung lên thành quả cầu lửa lớn. Tuyệt đối không dội nước vào dầu cháy.'],
+  carry:['bad',1.6,'SAI! Bưng chảo dễ làm sánh dầu cháy ra người và sàn nhà, gây bỏng và cháy lan.'],
+  lid:['good',0,'ĐÚNG! Tắt bếp (hoặc ngắt cầu dao nếu an toàn), đậy kín vung để lửa hết ô-xy. Giữ nguyên vung đến khi chảo nguội hẳn.'],
+  blanket:['good',0,'ĐÚNG! Trùm kín chảo bằng chăn chữa cháy (hoặc khăn ướt đã vắt kiệt), tắt bếp. Chú ý đưa tay ra xa, không để lửa bén vào người.']};
+function oil(k){const [t,sc,msg]=OIL[k];$$('[data-o]').forEach(b=>{b.classList.remove('done','oops');if(b.dataset.o===k)b.classList.add(t==='good'?'done':'oops')});const f=$('#flame');f.style.transform=`scale(${sc||.01})`;
+  $('#lid').setAttribute('opacity',k==='lid'?1:0);$('#led').setAttribute('fill',t==='good'?'#78909c':'#ff5252');
+  const s=$('#st2');s.textContent=msg;s.className='status '+(t==='good'?'ok':'danger');
+  if(t==='bad'&&!RM){const p=$('#panbox');p.classList.remove('shake');void p.offsetWidth;p.classList.add('shake')}}
+$$('[data-o]').forEach(b=>b.addEventListener('click',()=>oil(b.dataset.o)));
+$('#reset2').addEventListener('click',()=>{$$('[data-o]').forEach(b=>b.classList.remove('done','oops'));$('#flame').style.transform='scale(1)';$('#lid').setAttribute('opacity',0);$('#led').setAttribute('fill','#ff5252');const s=$('#st2');s.textContent='Lửa đang cháy trong chảo dầu!';s.className='status'});
+/* ---------- Ổ cắm ---------- */
+const DEV=[['Bếp từ',2000],['Ấm siêu tốc',1800],['Nồi cơm điện',700],['Lò vi sóng',1200],['Bình nóng lạnh',2500],['Quạt điện',60],['Sạc điện thoại',20],['Tivi',100]];
+const on=new Set();
+$('#dev').innerHTML=DEV.map((d,i)=>`<button data-i="${i}" aria-pressed="false"><span>${d[0]}<br><span class="w" style="font-weight:600;color:var(--mute)">${d[1].toLocaleString('vi-VN')} W</span></span></button>`).join('');
+$('#dev').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.i;
+  on.has(i)?on.delete(i):on.add(i);b.setAttribute('aria-pressed',on.has(i));
+  const w=[...on].reduce((a,i)=>a+DEV[i][1],0);$('#wt').textContent=`${w.toLocaleString('vi-VN')} W / 2.200 W`;
+  $('#wfill').style.width=Math.min(100,w/3300*100)+'%';const s=$('#st3');
+  if(w>2200){s.className='status danger';s.textContent='QUÁ TẢI! Dây và ổ cắm nóng lên, có thể chảy nhựa và chập cháy. Thiết bị công suất lớn phải cắm ổ riêng, trên tường.'}
+  else if(w>1700){s.className='status';s.textContent='Gần quá tải. Không nên dùng lâu, sờ thấy ổ cắm ấm là phải rút bớt.'}
+  else{s.className='status ok';s.textContent='Ổ cắm đang an toàn.'}});
+/* ---------- Đố vui ---------- */
+const Q=[['Ngửi thấy mùi ga trong bếp, việc đầu tiên KHÔNG được làm là gì?',['Mở cửa sổ','Bật đèn xem chỗ rò','Khóa van bình ga'],1,'Bật đèn tạo tia lửa điện, có thể gây nổ.'],
+  ['Khí ga (LPG) rò rỉ thường tích tụ ở đâu?',['Sát trần nhà','Sát sàn nhà','Đều khắp phòng'],1,'Khí ga nặng hơn không khí nên đọng ở sàn và chỗ trũng.'],
+  ['Chảo dầu bốc cháy, cách xử lý đúng là?',['Dội nước','Tắt bếp, đậy kín vung','Quạt cho tắt'],1,'Đậy vung làm lửa thiếu ô-xy và tắt.'],
+  ['Số điện thoại Cảnh sát PCCC và CNCH là?',['113','114','115'],1,'113 là Công an, 114 là PCCC và CNCH, 115 là Cấp cứu y tế.'],
+  ['Bếp từ, ấm siêu tốc nên cắm vào đâu?',['Ổ cắm riêng, gắn tường','Chung ổ kéo dài với nồi cơm','Ổ nào cũng được'],0,'Thiết bị công suất lớn dễ gây quá tải nếu cắm chung.']];
+let score=0,ans=0;
+$('#quiz').innerHTML=Q.map((q,i)=>`<div class="card q" data-q="${i}"><h3>Câu ${i+1}. ${q[0]}</h3><div class="opts">${q[1].map((o,j)=>`<button data-j="${j}">${o}</button>`).join('')}</div><div class="fb" aria-live="polite"></div></div>`).join('');
+$('#quiz').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const box=b.closest('.q'),q=Q[+box.dataset.q],j=+b.dataset.j;
+  box.querySelectorAll('button').forEach((x,k)=>{x.disabled=true;if(k===q[2])x.classList.add('right')});
+  if(j!==q[2])b.classList.add('wrong');else score++;
+  box.querySelector('.fb').textContent=(j===q[2]?'Đúng rồi! ':'Chưa đúng. ')+q[3];
+  if(++ans===Q.length){const s=$('#score');s.style.display='block';s.className='status '+(score>=4?'ok':'');s.textContent=`Bạn trả lời đúng ${score}/5 câu.`+(score<5?' Đọc lại phần giải thích để nhớ nhé!':' Tuyệt vời!')}});
+/* ---------- Tự kiểm tra ---------- */
+const C=['Kiểm tra dây dẫn, van ga định kỳ bằng nước xà phòng (không dùng lửa)','Đặt bình ga ở nơi thoáng, không để trong tủ kín','Khóa van bình ga mỗi khi nấu xong và trước khi đi ngủ','Mua ga ở đại lý uy tín, bình có tem, niêm phong','Không cắm bếp từ, ấm siêu tốc chung ổ kéo dài','Nhà có bình chữa cháy hoặc chăn chữa cháy','Nhà có lối thoát nạn thứ hai; chuồng cọp có cửa mở được từ bên trong','Cả nhà đều biết số 114'];
+let saved=[];try{saved=JSON.parse(localStorage.getItem('pccc-chk')||'[]')}catch(e){}
+$('#chklist').innerHTML=C.map((c,i)=>`<li><label><input type="checkbox" data-i="${i}" ${saved.includes(i)?'checked':''}>${c}</label></li>`).join('');
+function chk(){const v=$$('#chklist input').filter(x=>x.checked).map(x=>+x.dataset.i);try{localStorage.setItem('pccc-chk',JSON.stringify(v))}catch(e){}
+  const r=$('#chkres'),n=v.length;r.className='status '+(n===C.length?'ok':n<5?'danger':'');
+  r.textContent=n===C.length?'Nhà bạn đã làm đủ 8/8 việc. Rất tốt!':`Đã làm ${n}/8 việc. Hãy hoàn thành các mục còn lại để bảo vệ gia đình.`}
+$('#chklist').addEventListener('change',chk);chk();
+}
+</script>
+</body>
+</html>
