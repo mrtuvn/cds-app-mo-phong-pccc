@@ -97,13 +97,14 @@ body.modal{overflow:hidden}
 .totop.show{opacity:1;visibility:visible;transform:none}
 .totop svg{width:30px;height:30px}
 body.modal .totop{display:none}
+.hide {display: none !important;}
 @media(prefers-reduced-motion:reduce){.shake,#boom.on{animation:none}.fill,#flame{transition:none}}
 </style>
 </head>
 <body>
 <header class="top band" style="padding-block:14px">
   <div class="in">
-    <div class="org" style="display:none;">UBND phường Ô Chợ Dừa · Tuyên truyền PCCC</div>
+    <div class="org"><span class="hide">UBND phường Ô Chợ Dừa · </span>Tuyên truyền PCCC</div>
     <a class="call" href="tel:114" aria-label="Gọi 114">☎ Gọi 114</a>
   </div>
   <nav class="in nav" aria-label="Mục lục">
@@ -240,7 +241,7 @@ body.modal .totop{display:none}
     <div style="font-size:24px;font-weight:800">Khi có cháy nổ, rò rỉ khí ga, ra nơi an toàn và gọi</div>
     <a href="tel:114" class="big" style="text-decoration:none;display:block">114</a>
     <div style="font-size:20px;font-weight:700">Cảnh sát PCCC và CNCH</div>
-    <p style="margin:18px auto 0;font-size:17px;opacity:.9;display:none;">UBND phường Ô Chợ Dừa, Hà Nội</p>
+    <p style="margin:18px auto 0;font-size:17px;opacity:.9;" class="hide">UBND phường Ô Chợ Dừa, Hà Nội</p>
   </div>
 </footer>
 
